@@ -1,2 +1,4 @@
 terraform/terraform.tfstate.d/
 terraform/.terraform/
+terraform.tfstate*
+lambdas/venv/
