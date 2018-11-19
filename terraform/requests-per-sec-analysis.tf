@@ -106,6 +106,15 @@ resource "aws_security_group" "sgweb" {
   name = "vpc_test_web"
   description = "Allow incoming HTTP connections & SSH access"
 
+  # Allow all egress traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  
   ingress {
     from_port = 80
     to_port = 80
@@ -194,6 +203,9 @@ resource "aws_instance" "wb" {
   tags {
     Name = "webserver"
   }
+
+  
+
 }
 
 
@@ -211,22 +223,31 @@ resource "aws_instance" "db" {
   }
 }
 
-### FLOWLOG ###
+output "db-ip" {
+  value = "${aws_instance.db.private_ip}"
+}
 
-// Create flowlog for our main VPC
-resource "aws_flow_log" "flowlog" {
-  iam_role_arn    = "${aws_iam_role.flow-log-role.arn}"
+output "webserver-ip" {
+  value = "${aws_instance.wb.public_ip}"
+}
+
+
+
+############################## FLOWLOG ##############################
+
+// Create flowlog from our main VPC to a cloudwatch stream
+resource "aws_flow_log" "flowlog-cw" {
+  iam_role_arn    = "${aws_iam_role.cw-full-access-role.arn}"
   log_destination = "${aws_cloudwatch_log_group.rps-cloudwatch-log-group.arn}"
   traffic_type    = "ALL"
   vpc_id          = "${aws_vpc.main.id}"
 }
 
 // Create cloudwatch log group 
-resource "aws_cloudwatch_log_group" "rps-cloudwatch-log-group" {
-  name = "rps-cloudwatch-log-group"
-}
+resource "aws_cloudwatch_log_group" "rps-cloudwatch-log-group" {}
 
-resource "aws_iam_role" "flow-log-role" {
+// Role to provide our flowlog with full access to cloud watch
+resource "aws_iam_role" "cw-full-access-role" {
 
   assume_role_policy = <<EOF
 {
@@ -244,12 +265,30 @@ resource "aws_iam_role" "flow-log-role" {
 }
 EOF
 }
-
-// Create a log stream containing the flowlog contents
-resource "aws_cloudwatch_log_stream" "cloudwatch-flowlog-stream" {
-  name           = "rps-cloudwatch-flowlog-stream"
-  log_group_name = "${aws_cloudwatch_log_group.rps-cloudwatch-log-group.name}"
+data "aws_iam_policy" "CloudWatchFullAccess" {
+  arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
 }
+
+resource "aws_iam_role_policy_attachment" "cw-full-access-to-role" {
+  role = "${aws_iam_role.cw-full-access-role.name}"
+  policy_arn = "${data.aws_iam_policy.CloudWatchFullAccess.arn}"
+}
+
+
+
+resource "aws_flow_log" "flowlog-s3" {
+  log_destination = "${aws_s3_bucket.flowlog-bucket.arn}"
+  log_destination_type = "s3"
+  traffic_type    = "ALL"
+  vpc_id          = "${aws_vpc.main.id}"
+}
+resource "aws_s3_bucket" "flowlog-bucket" {
+  bucket = "rps-flowlog-bucket"
+    
+}
+
+
+
 
 ### KINESIS STREAM ###
 
@@ -257,7 +296,7 @@ resource "aws_cloudwatch_log_stream" "cloudwatch-flowlog-stream" {
 resource "aws_kinesis_stream" "kinesis-flowlog-stream" {
   name             = "kinesis-flowlog-stream"
   shard_count      = 1
-  retention_period = 48
+  retention_period = 24
 
   shard_level_metrics = [
     "IncomingBytes",
@@ -269,13 +308,13 @@ resource "aws_kinesis_stream" "kinesis-flowlog-stream" {
 resource "aws_cloudwatch_log_subscription_filter" "cloudwatch-to-kinesis-subscription" {
   name = "test_lambdafunction_logfilter"
 
-  role_arn        = "${aws_iam_role.cwl-to-kinesis-role.arn}"
+  role_arn        = "${aws_iam_role.full-access-to-kinesis.arn}"
   log_group_name  = "${aws_cloudwatch_log_group.rps-cloudwatch-log-group.name}"
   filter_pattern  = ""
   destination_arn = "${aws_kinesis_stream.kinesis-flowlog-stream.arn}"
 }
 
-resource "aws_iam_role" "cwl-to-kinesis-role" {
+resource "aws_iam_role" "full-access-to-kinesis" {
   name = "cwlog-to-kinesis-role"
 
   assume_role_policy = <<EOF
@@ -294,13 +333,11 @@ resource "aws_iam_role" "cwl-to-kinesis-role" {
 }
 EOF
 }
-
 data "aws_iam_policy" "AmazonKinesisFullAccess" {
   arn = "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "kinesisfullaccess-to-cwl-to-kinesis-role" {
-  role = "${aws_iam_role.cwl-to-kinesis-role.name}"
+} 
+resource "aws_iam_role_policy_attachment" "full-access-to-kinesis-attachment" {
+  role = "${aws_iam_role.full-access-to-kinesis.name}"
   policy_arn = "${data.aws_iam_policy.AmazonKinesisFullAccess.arn}"
 }
 
