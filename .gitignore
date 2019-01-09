@@ -1,2 +1,3 @@
 terraform/terraform.tfstate.d/
 terraform/.terraform/
+.vscode/
