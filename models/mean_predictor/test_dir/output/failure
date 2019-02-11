@@ -1,0 +1,5 @@
+Exception during training: [Errno 2] No such file or directory: '/opt/ml/input/config/hyperparameters.json'
+Traceback (most recent call last):
+  File "/opt/program/train", line 38, in train
+    with open(param_path, 'r') as tc:
+IOError: [Errno 2] No such file or directory: '/opt/ml/input/config/hyperparameters.json'
