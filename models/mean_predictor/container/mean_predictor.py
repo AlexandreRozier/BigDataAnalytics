@@ -6,7 +6,7 @@ class MeanPredictor():
     def __init__(self, freq='5min'):
         self.freq = freq
         
-    def fit(self,x,square_deviation=True):
+    def fit(self,x,square_deviation=False):
         x_group = x.groupby(np.array(list(map(self.__time_hash,x.index))).T.tolist())
         x_mean = x_group.mean()
         self.mean_dict = dict(zip(list(x_mean.index),x_mean.values.flatten()))
@@ -29,9 +29,12 @@ class MeanPredictor():
             assert type(t.stop) is pd.Timestamp
             assert t.step is None or type(t.step) is int
             step = t.step if type(t.step) is int else 1
-            time_range = pd.date_range(t.start,t.stop,freq=self.freq)[::t.step]
+            start, stop = t.start.ceil(self.freq), t.stop.floor(self.freq)
+            time_range = pd.date_range(start,stop,freq=self.freq)[::t.step]
             predictions = list(map(self.__predict,time_range))
-            return pd.DataFrame(index=time_range,data=predictions,columns=['Value','Std'])
+            df = pd.DataFrame(index=time_range,data=predictions,columns=['Value','Std'])
+            df.index.name = 'Timestamp'
+            return df
         else:
             assert t is pd.Timestamp
     

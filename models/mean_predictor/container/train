@@ -51,7 +51,7 @@ def train():
 
         # Here we only support a single hyperparameter. Note that hyperparameters are always passed in as
         # strings, so we need to do any necessary conversions.
-        freq = trainingParams.get('freq', None)
+        freq = trainingParams.get('freq', '5min')
         # Now use scikit-learn's decision tree classifier to train the model.
         clf = MeanPredictor(freq=freq)
         clf.fit(train_data)
