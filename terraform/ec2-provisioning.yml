@@ -1,0 +1,23 @@
+---
+- hosts: ec2
+  tasks:
+  
+  - name: Uploads requirements.txt
+    template:
+      src: ../utils/requirements.txt
+      dest: ~/requirements.txt
+
+  - name: Install python dependencies
+    pip:
+      requirements: ~/requirements.txt
+      executable: pip3.7
+      extra_args: --user --no-cache
+
+  - name: Upload script
+    template:
+      src: ../utils/streaming-data-mock.py
+      dest: ~/streaming-script.py
+
+  - name: Run script 
+    command: python3.7 streaming-script.py > stream.log 2&>error.log &
+    
