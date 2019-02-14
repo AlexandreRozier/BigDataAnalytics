@@ -10,7 +10,6 @@ import StringIO
 import sys
 import signal
 import traceback
-
 import flask
 
 import pandas as pd
@@ -19,6 +18,9 @@ prefix = '/opt/ml/'
 model_path = os.path.join(prefix, 'model', 'model.pkl')
 # A singleton for holding the model. This simply loads the model and holds it.
 # It has a predict function that does a prediction based on the model and the input data.
+
+class FormatException(Exception):
+    pass
 
 class ScoringService(object):
     model = None                # Where we keep the model when it's loaded
@@ -32,16 +34,20 @@ class ScoringService(object):
         return self.model
 
     @classmethod
-    def predict(self, data):
+    def predict(self, req):
         """For the input, do the predictions and return them.
 
         Args:
             input (a pandas dataframe): The data on which to do the predictions. There will be
                 one prediction per row in the dataframe"""
         model = self.get_model()
-        start = pd.Timestamp(data.index[0])
-        end = pd.Timestamp(data.index[1])
-        print(start,end)
+        if req.get('start') is None or req.get('end') is None:
+            raise FormatException()
+        try:
+            start = pd.Timestamp(req['start'])
+            end = pd.Timestamp(req['end'])
+        except ValueError:
+            raise FormatException()
         return model[start:end:1]
 
 # The flask app for serving predictions
@@ -62,24 +68,31 @@ def transformation():
     it to a pandas data frame for internal use and then convert the predictions back to CSV (which really
     just means one prediction per line, since there's a single column.
     """
-    data = None
+    try:
+        if not flask.request.content_type in ['text/json','application/json']:
+            raise FormatException()
 
-    # Convert from CSV to pandas
-    if flask.request.content_type in ['text/csv','text/plain']:
         data = flask.request.data.decode('utf-8')
-        s = StringIO.StringIO(data)
-        data = pd.read_csv(s,index_col=0, parse_dates=True, header=None)
-    else:
-        return flask.Response(response='This predictor only supports CSV data', status=415, mimetype='text/plain')
+        req_dict = json.loads(data)
 
-    print('Invoked with {} records'.format(data.shape[0]))
-
-    # Do the prediction
-    predictions = ScoringService.predict(data)
-
-    # Convert from numpy back to CSV
-    out = StringIO.StringIO()
-    predictions.to_csv(out, header=False, index=False)
-    result = out.getvalue()
+        # Do the prediction
+        predictions = ScoringService.predict(req_dict)
+        # Convert from numpy back to CSV
+        out = StringIO.StringIO()
+        predictions.to_csv(out, header=True, index=True)
+        result = out.getvalue()
+    except FormatException:
+        return send_instructions()
 
     return flask.Response(response=result, status=200, mimetype='text/csv')
+
+def send_instructions():
+    error_msg = """
+    Required text/json with format:\n
+    {\n
+        "start": "YYYY-MM-DD HH:MM:00",\n
+        "end": YYYY-MM-DD HH:MM:00\n
+    }\n
+    """
+    return flask.Response(response=error_msg, status=415, mimetype='text/plain')
+
