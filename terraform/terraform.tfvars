@@ -1,9 +1,10 @@
-secret_key="SsWAucbvQjFkidcMjL17TFjKDiVv6Ma47T+uJ2yy"
-access_key="AKIAJCF47PRJIZBALEUQ"
-account_id="746022503515"
+secret_key="secret-key"
+access_key="access-key"
+account_id="aws-account-id"
 deepar_endpoint_name="deep-ar"
 mp_endpoint_name="mean-predictor"
-data_aggregation_frequency="5min" // Stick to minutes for compatibility reasons
-chatbot_url="https://rgh2w4wxk8.execute-api.eu-west-1.amazonaws.com/alert_manager_notification_api_stage_name/"
-slack_url="https://hooks.slack.com/services/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"
+data_aggregation_frequency="5min" // Please stick to minutes for compatibility reasons
+chatbot_url="chatbot_url" // Url of the API provided by the chatbot team. Used to plug our pipeline with their chatbot!
+slack_url="slack_url"  // Slack url where to send slack messages
+slack_authorization_token="token"
 bmw-bucket="fog-bigdata-bmw-data"

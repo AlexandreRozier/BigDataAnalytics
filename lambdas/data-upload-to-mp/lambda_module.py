@@ -15,7 +15,7 @@ import sys
 
 def lambda_handler(event, context):
 
-
+    token = os.environ['SLACK_TOKEN']
     # LOGGING to cloudwatch
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)

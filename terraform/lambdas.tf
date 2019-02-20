@@ -5,6 +5,8 @@ variable "mp_endpoint_name" {}
 variable "data_aggregation_frequency" {}
 variable "chatbot_url" {}
 variable "slack_url" {}
+variable "slack_authorization_token" {}
+
 locals {
   DataUploadToDeepAR_zip_path = "${path.module}/../lambdas/data-upload-to-deepar/lambda.zip"
   DataUploadToMP_zip_path = "${path.module}/../lambdas/data-upload-to-mp/lambda.zip"
@@ -63,6 +65,7 @@ resource "aws_lambda_function" "DataUploadToMP" {
   environment {
     variables = {
       ENDPOINT_NAME = "${var.mp_endpoint_name}"
+      SLACK_TOKEN = "${var.slack_authorization_token}"
     }
   }
 }
