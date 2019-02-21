@@ -1,5 +1,6 @@
 ---
 - hosts: ec2
+  gather_facts: no
   tasks:
   
   - name: Uploads requirements.txt
@@ -17,7 +18,10 @@
     template:
       src: ../utils/streaming-data-mock.py
       dest: ~/streaming-script.py
+  
+  - name: Killing all previously running python3 scripts... (caution, might be dangerous)
+    command: killall python3   
 
   - name: Run script 
-    command: python3.7 streaming-script.py > stream.log 2&>error.log &
+    shell: cd ~; nohup python3 streaming-script.py </dev/null >/dev/null 2>&1 &
     

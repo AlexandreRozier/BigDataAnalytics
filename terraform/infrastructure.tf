@@ -32,8 +32,7 @@ resource "aws_instance" "stream_data_mock_instance" {
   iam_instance_profile= "EC2_S3Access"
   key_name= "${aws_key_pair.default-vpc-access.key_name}"
   provisioner "local-exec" {// todo add ip to hosts
-  command ${self.public_ip} >> hosts.ini
-    command = "ansible-playbook ec2-provisioning.yml --private-key ~/Downloads/dafault-vpc-access.pem -i ansible-hosts.ini"
+    command = "${self.public_ip} >> ansible-hosts.ini && ansible-playbook ec2-provisioning.yml --private-key ~/Downloads/dafault-vpc-access.pem -i ansible-hosts.ini"
   }
 
 }
@@ -42,7 +41,7 @@ output "public_ip" {
 }
 
 resource "aws_key_pair" "default-vpc-access" {
-  key_name   = "dafault-vpc-access"
+  key_name   = "default-vpc-access"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBvRU73Kgr7rxTgXNOiDZG4/iYubUy1P4GsSE4fZlcs3TIDm5NltGFXo4MDwXSvBJuds1zWSDrNpnOTtWfifpenCZs/+y4TeBygK/5Pt04xQyboO5ytawSgLm4VCFwj8nibAcO1wkAtjh5+Q+sVcnsIhW7qTJ5OJwdTYJg4JJNJKn4FIfBMnucZkge2687qLioN3tPwgYG9LsPkdZHEM5kd/dO2AkFkzA3knREVmXCnpyq/c1gy9ufecMeR4nPszvHMgRlzfxx9SuDqjXER7KqYQRmmy7c7ThtwZ33BUVfRwnT+4jUns9WcShGYG3uWgItU9XWytX4JCGxtP0pXEUH dafault-vpc-access"
 }
 output "default-vpc-access-public_key" {
