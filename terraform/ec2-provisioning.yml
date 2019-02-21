@@ -1,8 +1,10 @@
 ---
-- hosts: ec2
+- hosts: all
   gather_facts: no
-  tasks:
   
+ 
+  
+  tasks:
   - name: Uploads requirements.txt
     template:
       src: ../utils/requirements.txt
@@ -19,9 +21,14 @@
       src: ../utils/streaming-data-mock.py
       dest: ~/streaming-script.py
   
-  - name: Killing all previously running python3 scripts... (caution, might be dangerous)
-    command: killall python3   
+  - name: Kill previous python3 scripts (Dangerous, could kill other python3 scripts)
+    command: killall python3
 
   - name: Run script 
     shell: cd ~; nohup python3 streaming-script.py </dev/null >/dev/null 2>&1 &
+    environment: 
+      S3_BUCKET_NAME: 'fog-datasets'
+      S3_KEY: 'streaming-data-mock.csv'
+      S3_OUTPUT_DIRECTORY: 'streaming-data-mock'
+
     

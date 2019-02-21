@@ -9,9 +9,8 @@ import schedule
 import time
 import logging
 import sys
+import os   
 
-
-bucket_name = 'fog-datasets'
 s3_con = boto3.client('s3')
 frequency_min = 15
 
@@ -27,7 +26,8 @@ logging.basicConfig(filename='output.log',level=logging.DEBUG)
 logging.info('Starting data streaming, upload frequency: '+str(frequency_min)+'min...')
 
 # Read fixed historical data & generate a Dataframe from it
-file_name = 'streaming-data-mock.csv'
+bucket_name = os.environ['S3_BUCKET_NAME']
+file_name = os.environ['S3_KEY']
 data = []
 file_str = s3_con.get_object(Bucket=bucket_name, Key=file_name).get('Body').read().decode('utf-8')
 df = pd.read_csv('s3:{}/{}'.format(bucket_name,file_name),index_col=[0])
@@ -55,8 +55,8 @@ def job():
         return
 
     # Upload BMW-like formatted data, in order to trigger the analysis pipeline
-    data_bucket_name = 'fog-datasets'
-    directory = 'streaming-data-mock'
+    data_bucket_name = os.environ['S3_BUCKET_NAME']
+    directory = os.environ['S3_OUTPUT_DIRECTORY']   
     e_t = today - timedelta(minutes=frequency_min)
     filename = "{}-{}-{}-{}-{}---{}-{}-{}-{}-{}.json".format(e_t.year,e_t.month,e_t.day,e_t.hour,e_t.minute,today.year,today.month,today.day,today.hour,today.minute)
 
