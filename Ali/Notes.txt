@@ -1,0 +1,47 @@
+Notes:
+
+- Methods that call the models need ENVIROMENT variables (Endpoint names) to work properly.
+- Methods that connect to S3 buckets need proper access policies and roles, or else it will fail.
+- Make sure to have all proper dependencies packaged (Or create a layer with Slack + Python dependencies).
+
+
+S3 Buckets Used:
+
+1- RCF_Data_Join_SageMaker (arn:aws:s3:::rcf-sagemaker-testdata // Event type: ObjectCreated // Suffix: .csv)
+2- Model_Data_Join (fog-bigdata-logs)
+
+Roles Used:
+
+1- RCF_Anomaly_Model (API_Lambda_Role)
+2- alertDemo (API_Lambda_Role)
+3- anomalyDetection (API_Lambda_Role)
+4- DemoF (API_Lambda_Role)
+5- RCF_Anomaly_Model_2 (API_Lambda_Role)
+6- RCF-Slack (API_Lambda_Role)
+7- RCF_Data_Join_SageMaker (Kinesis_Model_Join)
+8- Model_Data_Join (Kinesis_Model_Join)
+
+
+Enviroment Variables:
+
+1- RCF_Anomaly_Model --> randomcutforest-2019-01-22-14-35-53-938 (ENDPOINT_NAME)
+2- anomalyDetection -- anomaly-detection-2018-12-14-12-15-48-440 (ENDPOINT_NAME)
+3- DemoF --> DEMO-linear-endpoint-201811141356 (ENDPOINT_NAME)
+4- RCF_Anomaly_Model_2 --> randomcutforest-2019-02-21-13-59-00-941 (ENDPOINT_NAME)
+5- RCF-Slack --> #aws (CHANNEL) // https://hooks.slack.com/services/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 (WEBHOOK)
+
+SNS Topics:
+
+1- alertDemo (arn:aws:sns:us-east-1:746022503515:api-test)
+2- RCF_Anomaly_Model_2 (arn:aws:sns:us-east-1:746022503515:RCF-SageMaker)
+3- RCF-Slack (arn:aws:sns:us-east-1:746022503515:RCF-SageMaker)
+4- Model_Data_Join (arn:aws:sns:us-east-1:746022503515:s3-logs-object-creation)
+
+Layers:
+
+1- RCF_Anomaly_Model_2 (2 layers --> arn:aws:lambda:us-east-1:746022503515:layer:pandas-layer:2 // arn:aws:lambda:us-east-1:746022503515:layer:slack_layer:7) 
+
+API GateWay:
+
+1- RCF_Data_Join_SageMaker (RCF_API // arn:aws:execute-api:us-east-1:746022503515:5oa289k8j9/*/POST/rcf-methods)
+2- Model_Data_Join (Join_Model_Data // arn:aws:execute-api:us-east-1:746022503515:pqy6s3i6jf/*/POST/mode-data-join)
