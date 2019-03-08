@@ -14,6 +14,7 @@ import requests
 ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
 runtime= boto3.client('runtime.sagemaker')
 
+#Acts like a header for the Slack notifications. This has the graph attached to it
 payload_2={
   "title":"RCF Anomaly Detection",
   "initial_comment":"Detected Anomalies based on cut-off threshold",
@@ -37,6 +38,7 @@ def lambda_handler(event, context):
     # Parse the csv response
     res_str = response['Body'].read().decode("utf-8")
     data = json.loads(res_str)
+    #For debugging purposes
     debugging_message="\n\n######\n\nScores response from the model for debugging:\n\n" + res_str + "\n\n"
     # print(debugging_message)
     for item in data['scores']:
@@ -68,18 +70,21 @@ def lambda_handler(event, context):
         MessageStructure='text/plain',
     )
 
+    #Sending the plotted graph to the slack channel
     plot_send(payload, score_cutoff, score_array)
 
     # print("\n\n######\n\n", cut_off_final_score_debugging,"\n\n######\n\n") 
     # return (cut_off_final_score) 
     return (compare_cut_off(score_cutoff,payload))
     
+#Print all elements inside a list according to a specific regex
 def print_list(list):
     string = ""
     for element in list['data']:
         string = "\n".join([string,str(element.split(",")[1])])
     return string
 
+#Comparing the final cut-off scores with a list of data, these are the final cut-off scores
 def compare_cut_off(response_here, list_here):
     print("Final Cut-Off Scores with TIMESTAMP + Score: \n")
     i = 0
@@ -91,11 +96,13 @@ def compare_cut_off(response_here, list_here):
         i += 1    
     return ("Anomalies found --> TIMESTAMP + Score:",string_2)
 
+#Used for debugging purposes as well. It prints the received payload to check for errors in logging
 def print_payload(payload):
     # print(payload)
     for item in payload['data']:
         print(str(item.split(",")[0]), float(item.split(",")[1]))
 
+#Plotting the graph and sending it to Slack Channel
 def plot_send(dataFile, anomaly_score, array_results):
     
     x=[]
@@ -103,20 +110,26 @@ def plot_send(dataFile, anomaly_score, array_results):
     i=0
     data = json.dumps(dataFile['data'])
     
+    #Read the json as a csv
     df=pd.read_json(data)
     df.to_csv('/tmp/results.csv', index=False, header = 0)
     
+    #Grab the csv from tmp in lambda then parse the data into x and y array points
     with open('/tmp/results.csv', 'r') as csvFile:
         reader = csv.reader(csvFile, delimiter=',')
         for row in reader:
             # print((row[0].split(',')[0]))
+            #Apped time to X
             x.append(datetime.strptime((row[0].split(',')[0]), '%Y-%m-%d %H:%M:%S'))
+            #Append data point to Y
             y.append(float((row[0].split(',')[1])))
+            #if point is anomaly, then plot it
             if array_results[i] > anomaly_score:
                 plt.plot([datetime.strptime((row[0].split(',')[0]), '%Y-%m-%d %H:%M:%S')], [array_results[i]], marker='o', markersize=3, color="black", label='Anomalies')
             i += 1
         
     plt.plot(x,y)
+    #Horizantal line for Anomaly
     plt.axhline(y=anomaly_score, color='r', linestyle='-', label='Threshold')
     
     plt.title('Data from CSV: TimepStamps and Scores')
@@ -124,6 +137,7 @@ def plot_send(dataFile, anomaly_score, array_results):
     plt.xlabel('TimeStamps')
     plt.ylabel('Scores')
     
+    #Put the graph in a buffer and send it via request using payload_2
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)

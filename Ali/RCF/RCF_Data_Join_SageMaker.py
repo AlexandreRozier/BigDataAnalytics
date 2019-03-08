@@ -4,6 +4,7 @@ import json
 import botocore
 import time
 
+#Declare all needed variables and enviroments related to AWS
 s3 = boto3.client("s3")
 s3_r = boto3.resource('s3')
 keys_list = []
@@ -15,6 +16,7 @@ timestr = time.strftime("%Y%m%d---%H:%M:%S")
 
 def lambda_handler(event, context):
     
+    #List all keys inside this bucket
     list_keys('rcf-sagemaker-testdata')
     i = 1
     j = 1
@@ -43,12 +45,14 @@ def lambda_handler(event, context):
     #Remove the date from each element inside the list
     sum_list(sum_values_list)
     del_date(sum_values_list)
-        
-        # i += 1
+    
+    # i += 1
+    #Copy the file to another bucket after we finished working on it
     copy_to_bucket('rcf-sagemaker-testdata','rcf-sagemaker-finished', keys_list[0])
     
-     #Json dump
+    #Json dump
     json_result =  dump_to_csv(del_date_list)
+
     # return dump_to_json(json_list)
     return json.loads(json_result)
 
@@ -64,7 +68,7 @@ def del_date(list):
     for item in list:
         del_date_list.append(item.split(",")[-1])
 
-        
+#A standarized way to copy files from 1 bucket to another. 
 def copy_to_bucket(bucket_from_name, bucket_to_name, file_name):
     copy_source = {
         'Bucket': bucket_from_name,
@@ -74,12 +78,12 @@ def copy_to_bucket(bucket_from_name, bucket_to_name, file_name):
     # s3_r.Object(bucket_to_name, file_name).copy(copy_source)
     s3_r.Object(bucket_from_name,file_name).delete()
 
-
+#Print a given python list
 def print_list(list):
     for element in list:
         print(element)
     
-#Get list of keys
+#Get list of keys inside a directory/bucket
 def list_keys(bucket_name):
     for key in s3.list_objects(Bucket=bucket_name)['Contents']:
         if(key['Key']).endswith('.csv'):
@@ -93,7 +97,7 @@ def dump_to_csv(list):
     
     data = "\n".join(list)
     
-    #Write to csv file
+    #Write to the list to a csv file and store it inside a bucket
     file_name = 'csv_dumps_{}.csv'.format(timestr)
     lambda_path = "/tmp/" + file_name
     s3_path = "csv_dumps/" + file_name
@@ -107,7 +111,7 @@ def dump_to_csv(list):
     # print ("\n\nAll Sum Data from CSV function:\n", data)
     return(resp["Payload"].read().decode())
     
-#Request to model needs to be a json
+#Request to model needs to be a json, so this function with parse the data to json before sending it
 def parse_to_json(objects):
    
     # objects = [float(i) for i in objects]

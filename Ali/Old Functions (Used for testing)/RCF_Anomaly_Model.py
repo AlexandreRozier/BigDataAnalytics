@@ -1,3 +1,5 @@
+#################### This function was previously used for RCF, but then i did a refactoring and created a new function with other improvments
+
 import os
 import io
 import boto3
