@@ -2,17 +2,17 @@ import sagemaker
 import json
 import pandas as pd
 
-def series_to_obj(ts, dynamic_feats=None, cat=None):
-    """
-    dynamic_feats: [[]]
-    """
-    obj = {"start": str(ts.index[0]), "target": list(ts), "dynamic_feat":dynamic_feats}
+def series_to_obj(ts, dyn_feat=None, cat=None):
+    obj = {"start": str(ts.index[0]),  "target": list(ts)}
     if cat is not None:
         obj["cat"] = cat
+
+    if dyn_feat is not None:
+        obj["dynamic_feat"] = dyn_feat,
     return obj
 
-def series_to_jsonline(ts, dynamic_feats=None, cat=None):
-    return json.dumps(series_to_obj(ts, dynamic_feats, cat))
+def series_to_jsonline(ts, dyn_feat=None, cat=None):
+    return json.dumps(series_to_obj(ts, dyn_feat))
 
 class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
 
@@ -29,7 +29,7 @@ class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
         self.freq = freq
         self.prediction_length = prediction_length
         
-    def predict(self, ts, dynamic_feats_per_series, cat=None, encoding="utf-8", num_samples=100, quantiles=["0.1", "0.5", "0.9"]):
+    def predict(self, ts, dynamic_feats_per_series=None, cat=None, encoding="utf-8", num_samples=100, quantiles=["0.1", "0.5", "0.9"]):
         """Requests the prediction of for the time series listed in `ts`, each with the (optional)
         corresponding category listed in `cat`.
         
@@ -44,11 +44,12 @@ class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
         """
         prediction_times = [x.index[-1]+1 for x in ts]
         req = self.__encode_request(ts, dynamic_feats_per_series, cat, encoding, num_samples, quantiles)
+
         res = super(DeepARPredictor, self).predict(req)
         return self.__decode_response(res, prediction_times, encoding)
     
     def __encode_request(self, ts, dynamic_feats_per_series,cat, encoding, num_samples, quantiles):
-        instances = [series_to_obj(ts[k], dynamic_feats_per_series[k] if dynamic_feats_per_series else None, cat[k] if cat else None) for k in range(len(ts))]
+        instances = [series_to_obj(ts[k], dynamic_feats_per_series[k]) for k in range(len(ts))]
         configuration = {"num_samples": num_samples, "output_types": ["quantiles"], "quantiles": quantiles}
         http_request_data = {"instances": instances, "configuration": configuration}
         return json.dumps(http_request_data).encode(encoding)
@@ -60,3 +61,5 @@ class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
             prediction_index = pd.DatetimeIndex(start=prediction_times[k], freq=self.freq, periods=self.prediction_length)
             list_of_df.append(pd.DataFrame(data=response_data['predictions'][k]['quantiles'], index=prediction_index))
         return list_of_df
+
+    

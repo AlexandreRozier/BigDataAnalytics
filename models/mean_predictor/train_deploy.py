@@ -56,6 +56,5 @@ if __name__ == '__main__':
     1, 
     'ml.t2.medium',
     endpoint_name=args.name,
-    update_endpoint=True,
     serializer=json_serializer
   )

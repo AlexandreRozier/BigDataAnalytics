@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     logger.addHandler(handler)
     
     try:
-         msg = json.loads(event["Records"][0]["Sns"]["Message"])
+        msg = json.loads(event["Records"][0]["Sns"]["Message"])
     except Exception as e:
         logger.error("Failed to parse msg:"+e)
         raise e
@@ -68,7 +68,7 @@ def lambda_handler(event, context):
     body = json.dumps(http_request_data).encode('utf-8')
     runtime= boto3.client('runtime.sagemaker')
     
-    res = runtime.invoke_endpoint(EndpointName=os.environ['ENDPOINT_NAME'],
+    res = runtime.invoke_endpoint(EndpointName='mean-predictor',
                                        ContentType='application/json',
                                        Body=body)
     logger.debug(res)                                   
@@ -87,26 +87,36 @@ def lambda_handler(event, context):
             anomalies_idx.append(time)
 
     anomalies_series = serie[anomalies_idx]
-    if(not anomalies_series.empty):
     
+   
+    
+    if(not anomalies_series.empty):
+        # Triggers the chatbot team alert pipeline
+        lambda_client = boto3.client('lambda')
+        json_body = json.dumps({'message':'Anomalies detected! Escalating to response team.'}) 
+        invoke_response = lambda_client.invoke(FunctionName="alertDemo",
+                                           InvocationType='RequestResponse',
+                                           Payload=json_body)    
+        # Sends message to slack
         payload={
             "title":"Live anomaly detection",
-            "initial_comment":"Detected new data batch. You'll find below the result of our anomaly.",
+            "initial_comment":"New anomalies detected! More information provided below.",
             "filename":"buf.png",
             "token":"xoxp-463923555735-464821849926-544895594565-795f5333d4821f875dcd5e128a17abd8",
             "channels":['#aws'],
         }
         
-        ax = res['Value'].plot(label='prediction median', figsize=(12,6))
+        ax = res['Value'].plot(label='prediction median', color='#250CBB', figsize=(12,6))
         p10 = res['Value']-res['Std']
         p90 = res['Value']+res['Std']
-        ax.fill_between(p10.index, p10, p90, color='y', alpha=0.5, label='Normal behavior area')
+        ax.fill_between(p10.index, p10, p90, color='#7DCEFF', alpha=0.5, label='Normal behavior area')
         anomalies_series.plot(
-            style=['.'],
+            style=['rs'],
             label='Anomalies',
             ax = ax)
+        ax.set_ylabel('Count')
         ax.legend()
-
+        #plt.show()
 
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
@@ -140,10 +150,11 @@ def lambda_handler(event, context):
             "channels":['#aws'],
     }
     
-    ax = res['Value'].plot(label='prediction median', figsize=(12,6))
+    ax = res['Value'].plot(label='prediction median',color="#250CBB", figsize=(12,6))
     p10 = res['Value']-res['Std']
     p90 = res['Value']+res['Std']
-    ax.fill_between(p10.index, p10, p90, color='y', alpha=0.5, label='Average Standard Deviation')
+    ax.fill_between(p10.index, p10, p90, color='#7DCEFF', alpha=0.5, label='Average Standard Deviation')
+    ax.set_ylabel('Count')
     ax.legend()
 
     buf = io.BytesIO()
