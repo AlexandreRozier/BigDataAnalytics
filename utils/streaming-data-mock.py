@@ -12,9 +12,25 @@ import sys
 import os   
 
 s3_con = boto3.client('s3')
-frequency_min = 15
 
-""" For local debug purpose, redirects logging to stdout
+""" 
+This python script is uploaded to an EC2 instance and used to mock the arrival of data in a stream-like fashion.
+It retrieves its data from a specific file in S3 and periodically uploads it back to a chosen S3 location, where the processing
+pipeline handles it.
+Format of uploaded files: 
+        
+{
+    'Label': 'response-code-200', 
+    'Datapoints':[{
+        'Timestamp':datetime.datetime(2019,03,18, 05, 23, tzinfo=None), 
+        'SampleCount': 1223.0, 
+        'Unit': 'None'
+    }]
+}
+        
+
+For local debug purpose, you can redirect logging to stdout by uncommenting the following lines:
+
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(sys.stdout)
@@ -22,10 +38,11 @@ handler.setLevel(logging.DEBUG)
 root.addHandler(handler)
 """
 
+frequency_min = 15
 logging.basicConfig(filename='output.log',level=logging.DEBUG)
 logging.info('Starting data streaming, upload frequency: '+str(frequency_min)+'min...')
 
-# Read fixed historical data & generate a Dataframe from it
+# Read fixed historical data & generate a pandas' Dataframe from it
 bucket_name = os.environ['S3_BUCKET_NAME']
 file_name = os.environ['S3_KEY']
 data = []
@@ -34,9 +51,11 @@ df = pd.read_csv('s3:{}/{}'.format(bucket_name,file_name),index_col=[0])
 df.index = pd.to_datetime(df.index)
 logging.debug(df.head())
 
-
-
 def job():
+    """
+    This job is periodically triggered and has the task to upload data corresponding to the current period of time.
+    For instance, if run on a Thursday at 12, it would look for historical data at this period of time. 
+    """
     logging.info('Creating new batch...')
     today = datetime.datetime.today()
     # Select slice of data that should be sent, according to current datetime
@@ -44,8 +63,9 @@ def job():
     start_time_relative = end_time_relative - timedelta(minutes=frequency_min)
     df_to_send = df[df.index < end_time_relative]
     df_to_send = df_to_send[df_to_send.index > start_time_relative]
-    df_to_send.tail()
-
+    logging.debug(df_to_send.head())
+    
+    # Creates datapoints from the dataframe, with the same format as BMW's data:
     datapoints = []
     for time, row in df_to_send.iterrows():
         datapoints.append({'Timestamp':datetime.datetime(time.year,time.month,time.day, time.hour, time.minute, tzinfo=None), 'SampleCount': row.SampleCount, 'Unit': 'None'})
@@ -73,7 +93,7 @@ def job():
     except Exception as e:
         logging.error(e)
 
-
+# Schedule an upload job every frequency_min 
 schedule.every(frequency_min).minutes.do(job)
 while True:
     schedule.run_pending()
