@@ -1,0 +1,260 @@
+{
+    "version": 3,
+    "terraform_version": "0.11.11",
+    "serial": 10,
+    "lineage": "9d20046a-404a-d3b7-d3ac-6b9f6fc01e66",
+    "modules": [
+        {
+            "path": [
+                "root"
+            ],
+            "outputs": {},
+            "resources": {
+                "aws_iam_role.lambda_sagemaker_invoke": {
+                    "type": "aws_iam_role",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "lambda_sagemaker_invoke",
+                        "attributes": {
+                            "arn": "arn:aws:iam::746022503515:role/lambda_sagemaker_invoke",
+                            "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"lambda.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+                            "create_date": "2018-11-19T14:31:35Z",
+                            "description": "A role for creating lambda functions that are able to invoke sagemaker endpoints",
+                            "force_detach_policies": "false",
+                            "id": "lambda_sagemaker_invoke",
+                            "max_session_duration": "3600",
+                            "name": "lambda_sagemaker_invoke",
+                            "path": "/",
+                            "tags.%": "0",
+                            "unique_id": "AROAIGERM26SJN2V4MRWO"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_instance.stream_data_mock_instance": {
+                    "type": "aws_instance",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "i-0ab15c5bcb8506b61",
+                        "attributes": {
+                            "ami": "ami-035be7bafff33b6b6",
+                            "arn": "arn:aws:ec2:us-east-1:746022503515:instance/i-0ab15c5bcb8506b61",
+                            "associate_public_ip_address": "true",
+                            "availability_zone": "us-east-1a",
+                            "cpu_core_count": "1",
+                            "cpu_threads_per_core": "1",
+                            "credit_specification.#": "1",
+                            "credit_specification.0.cpu_credits": "standard",
+                            "disable_api_termination": "false",
+                            "ebs_block_device.#": "0",
+                            "ebs_optimized": "false",
+                            "ephemeral_block_device.#": "0",
+                            "get_password_data": "false",
+                            "iam_instance_profile": "EC2_S3Access",
+                            "id": "i-0ab15c5bcb8506b61",
+                            "instance_state": "running",
+                            "instance_type": "t2.micro",
+                            "ipv6_addresses.#": "0",
+                            "key_name": "dafault-vpc-access",
+                            "monitoring": "false",
+                            "network_interface.#": "0",
+                            "network_interface_id": "eni-08a5c1ccb0ddefc5a",
+                            "password_data": "",
+                            "placement_group": "",
+                            "primary_network_interface_id": "eni-08a5c1ccb0ddefc5a",
+                            "private_dns": "ip-10-0-0-131.ec2.internal",
+                            "private_ip": "10.0.0.131",
+                            "public_dns": "ec2-54-145-55-80.compute-1.amazonaws.com",
+                            "public_ip": "54.145.55.80",
+                            "root_block_device.#": "1",
+                            "root_block_device.0.delete_on_termination": "true",
+                            "root_block_device.0.iops": "100",
+                            "root_block_device.0.volume_id": "vol-0a6656bcb01aa97ae",
+                            "root_block_device.0.volume_size": "8",
+                            "root_block_device.0.volume_type": "gp2",
+                            "security_groups.#": "0",
+                            "source_dest_check": "true",
+                            "subnet_id": "subnet-0655a5146f1ceaab1",
+                            "tags.%": "0",
+                            "tenancy": "default",
+                            "volume_tags.%": "0",
+                            "vpc_security_group_ids.#": "1",
+                            "vpc_security_group_ids.2963833358": "sg-0377b457a0d771e88"
+                        },
+                        "meta": {
+                            "e2bfb730-ecaa-11e6-8f88-34363bc7c4c0": {
+                                "create": 600000000000,
+                                "delete": 1200000000000,
+                                "update": 600000000000
+                            },
+                            "schema_version": "1"
+                        },
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_key_pair.default-vpc-access": {
+                    "type": "aws_key_pair",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "dafault-vpc-access",
+                        "attributes": {
+                            "fingerprint": "1e:d4:4f:12:69:10:56:aa:2e:31:38:e0:d2:38:8d:b0:c2:45:52:eb",
+                            "id": "dafault-vpc-access",
+                            "key_name": "dafault-vpc-access"
+                        },
+                        "meta": {
+                            "schema_version": "1"
+                        },
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_lambda_function.BMWDataPushToDeepAR": {
+                    "type": "aws_lambda_function",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "BMWDataPushToDeepAR",
+                        "attributes": {
+                            "arn": "arn:aws:lambda:us-east-1:746022503515:function:BMWDataPushToDeepAR",
+                            "dead_letter_config.#": "0",
+                            "description": "",
+                            "environment.#": "0",
+                            "function_name": "BMWDataPushToDeepAR",
+                            "handler": "lambda_function.lambda_handler",
+                            "id": "BMWDataPushToDeepAR",
+                            "invoke_arn": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:746022503515:function:BMWDataPushToDeepAR/invocations",
+                            "kms_key_arn": "",
+                            "last_modified": "2019-02-07T15:15:32.783+0000",
+                            "layers.#": "2",
+                            "layers.0": "arn:aws:lambda:us-east-1:746022503515:layer:pandas-layer:2",
+                            "layers.1": "arn:aws:lambda:us-east-1:746022503515:layer:slack_layer:7",
+                            "memory_size": "384",
+                            "qualified_arn": "arn:aws:lambda:us-east-1:746022503515:function:BMWDataPushToDeepAR:1",
+                            "reserved_concurrent_executions": "0",
+                            "role": "arn:aws:iam::746022503515:role/lambda_sagemaker_invoke",
+                            "runtime": "python3.7",
+                            "source_code_hash": "SUPxDhPYaDppwKJlGdXB8Hw5RX7elDK1MoFGA3u6cvM=",
+                            "source_code_size": "2758",
+                            "tags.%": "0",
+                            "timeout": "130",
+                            "tracing_config.#": "1",
+                            "tracing_config.0.mode": "PassThrough",
+                            "version": "1",
+                            "vpc_config.#": "0"
+                        },
+                        "meta": {
+                            "e2bfb730-ecaa-11e6-8f88-34363bc7c4c0": {
+                                "create": 600000000000
+                            }
+                        },
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_s3_bucket.fog-datasets": {
+                    "type": "aws_s3_bucket",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "fog-datasets",
+                        "attributes": {
+                            "acceleration_status": "",
+                            "arn": "arn:aws:s3:::fog-datasets",
+                            "bucket": "fog-datasets",
+                            "bucket_domain_name": "fog-datasets.s3.amazonaws.com",
+                            "bucket_regional_domain_name": "fog-datasets.s3.amazonaws.com",
+                            "cors_rule.#": "0",
+                            "hosted_zone_id": "Z3AQBSTGFYJSTF",
+                            "id": "fog-datasets",
+                            "lifecycle_rule.#": "0",
+                            "logging.#": "0",
+                            "object_lock_configuration.#": "0",
+                            "region": "us-east-1",
+                            "replication_configuration.#": "0",
+                            "request_payer": "BucketOwner",
+                            "server_side_encryption_configuration.#": "0",
+                            "tags.%": "0",
+                            "versioning.#": "1",
+                            "versioning.0.enabled": "false",
+                            "versioning.0.mfa_delete": "false",
+                            "website.#": "0"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_s3_bucket_notification.StreamMockCreate": {
+                    "type": "aws_s3_bucket_notification",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "fog-datasets",
+                        "attributes": {
+                            "bucket": "fog-datasets",
+                            "id": "fog-datasets",
+                            "lambda_function.#": "0",
+                            "queue.#": "0",
+                            "topic.#": "2",
+                            "topic.0.events.#": "1",
+                            "topic.0.events.1767159610": "s3:ObjectCreated:Put",
+                            "topic.0.filter_prefix": "deep_ar/data",
+                            "topic.0.filter_suffix": "",
+                            "topic.0.id": "OWVmMDUyMjUtODAwNy00MzExLWFmYjQtZjVhYWIxNjNmMzhm",
+                            "topic.0.topic_arn": "arn:aws:sns:us-east-1:746022503515:bmw-data-push",
+                            "topic.1.events.#": "1",
+                            "topic.1.events.3356830603": "s3:ObjectCreated:*",
+                            "topic.1.filter_prefix": "streaming-data-mock",
+                            "topic.1.filter_suffix": "",
+                            "topic.1.id": "StreamMockCreate",
+                            "topic.1.topic_arn": "arn:aws:sns:us-east-1:746022503515:bmw-data-push"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                },
+                "aws_sns_topic.bmw-data-push": {
+                    "type": "aws_sns_topic",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "arn:aws:sns:us-east-1:746022503515:bmw-data-push",
+                        "attributes": {
+                            "application_failure_feedback_role_arn": "",
+                            "application_success_feedback_role_arn": "",
+                            "application_success_feedback_sample_rate": "0",
+                            "arn": "arn:aws:sns:us-east-1:746022503515:bmw-data-push",
+                            "delivery_policy": "",
+                            "display_name": "BMW push",
+                            "http_failure_feedback_role_arn": "",
+                            "http_success_feedback_role_arn": "",
+                            "http_success_feedback_sample_rate": "0",
+                            "id": "arn:aws:sns:us-east-1:746022503515:bmw-data-push",
+                            "kms_master_key_id": "",
+                            "lambda_failure_feedback_role_arn": "",
+                            "lambda_success_feedback_role_arn": "",
+                            "lambda_success_feedback_sample_rate": "0",
+                            "name": "bmw-data-push",
+                            "policy": "{\"Version\":\"2008-10-17\",\"Id\":\"__default_policy_ID\",\"Statement\":[{\"Sid\":\"__default_statement_ID\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":[\"SNS:GetTopicAttributes\",\"SNS:SetTopicAttributes\",\"SNS:AddPermission\",\"SNS:RemovePermission\",\"SNS:DeleteTopic\",\"SNS:Subscribe\",\"SNS:ListSubscriptionsByTopic\",\"SNS:Publish\",\"SNS:Receive\"],\"Resource\":\"arn:aws:sns:us-east-1:746022503515:bmw-data-push\",\"Condition\":{\"StringEquals\":{\"AWS:SourceOwner\":\"746022503515\"}}},{\"Sid\":\"_s3\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":\"SNS:Publish\",\"Resource\":\"arn:aws:sns:us-east-1:746022503515:bmw-data-push\",\"Condition\":{\"StringEquals\":{\"aws:SourceArn\":\"arn:aws:s3:::fog-datasets\"}}},{\"Sid\":\"_s3s\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"*\"},\"Action\":\"SNS:Publish\",\"Resource\":\"arn:aws:sns:us-east-1:746022503515:bmw-data-push\",\"Condition\":{\"StringEquals\":{\"aws:SourceArn\":\"arn:aws:s3:::fog-bigdata-bmw-data\"}}}]}",
+                            "sqs_failure_feedback_role_arn": "",
+                            "sqs_success_feedback_role_arn": "",
+                            "sqs_success_feedback_sample_rate": "0"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.aws"
+                }
+            },
+            "depends_on": []
+        }
+    ]
+}
