@@ -14,28 +14,35 @@ import os
 s3_con = boto3.client('s3')
 
 """ 
-This python script is uploaded to an EC2 instance and used to mock the arrival of data in a stream-like fashion.
-It retrieves its data from a specific file in S3 and periodically uploads it back to a chosen S3 location, where the processing
-pipeline handles it.
-Format of uploaded files: 
-        
-{
-    'Label': 'response-code-200', 
-    'Datapoints':[{
-        'Timestamp':datetime.datetime(2019,03,18, 05, 23, tzinfo=None), 
-        'SampleCount': 1223.0, 
-        'Unit': 'None'
-    }]
-}
-        
+ENVIRONMENT VARIABLES: 
+    S3_BUCKET_NAME: bucket where the frozen csv data resides
+    S3_KEY: key of the csv file representing our frozen data
+    S3_OUTPUT_BUCKET: s3 bucket receiving the mocked data
+    S3_OUTPUT_DIRECTORY: directory where you want the mocked data to be sent
 
-For local debug purpose, you can redirect logging to stdout by uncommenting the following lines:
+DESCRIPTION: 
+    This python script is uploaded to an EC2 instance and used to mock the arrival of data in a stream-like fashion.
+    It retrieves its data from a specific file in S3 and periodically uploads it back to a chosen S3 location, where the processing
+    pipeline handles it.
+    Format of uploaded files: 
+            
+    {
+        'Label': 'response-code-200', 
+        'Datapoints':[{
+            'Timestamp':datetime.datetime(2019,03,18, 05, 23, tzinfo=None), 
+            'SampleCount': 1223.0, 
+            'Unit': 'None'
+        }]
+    }
+        
+DEBUG: 
+    For local debug purpose, you can redirect logging to stdout by uncommenting the following lines:
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
-root.addHandler(handler)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    root.addHandler(handler)
 """
 
 frequency_min = 15
@@ -75,7 +82,7 @@ def job():
         return
 
     # Upload BMW-like formatted data, in order to trigger the analysis pipeline
-    data_bucket_name = os.environ['S3_BUCKET_NAME']
+    data_bucket_name = os.environ['S3_OUTPUT_BUCKET']
     directory = os.environ['S3_OUTPUT_DIRECTORY']   
     e_t = today - timedelta(minutes=frequency_min)
     filename = "{}-{}-{}-{}-{}---{}-{}-{}-{}-{}.json".format(e_t.year,e_t.month,e_t.day,e_t.hour,e_t.minute,today.year,today.month,today.day,today.hour,today.minute)
