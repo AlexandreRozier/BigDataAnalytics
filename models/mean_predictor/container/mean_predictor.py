@@ -7,6 +7,8 @@ class MeanPredictor():
         self.freq = freq
         
     def fit(self,x,square_deviation=False):
+        # Fits the model with a dataframe provided in x
+        # param: square_deviation  - Weather to use the standard deviation or mean euclidean distance
         x_group = x.groupby(np.array(list(map(self.__time_hash,x.index))).T.tolist())
         x_mean = x_group.mean()
         self.mean_dict = dict(zip(list(x_mean.index),x_mean.values.flatten()))
@@ -17,6 +19,7 @@ class MeanPredictor():
         self.std_dict = dict(zip(list(x_mean.index),x_std_dist))
     
     def __time_hash(self,t):
+        # Hashing function used to sort the data points into buckets
         return (t.weekday() < 5,t.hour,t.minute)
     
     def __predict(self,t):

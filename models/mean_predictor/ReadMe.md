@@ -37,3 +37,6 @@ Example:
 curl -d '{"start": "2019-01-28 00:05:00","end": "2019-02-10 00:20:00"}' -H "Content-Type: application/json" -X POST http:/localhost:8080/invocations
 ```
 
+The containerized model was implemented along the lines of the following tutorial:
+https://github.com/awslabs/amazon-sagemaker-examples/tree/master/advanced_functionality/scikit_bring_your_own
+
