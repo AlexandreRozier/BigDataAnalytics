@@ -1,22 +1,17 @@
 import json
-import slacker
 import boto3
 import os
 import pandas as pd
 import datetime
 from datetime import timedelta
 import logging
-import botocore 
 import json
 import numpy as np
 from dateutil.tz import tzlocal
-from matplotlib import pyplot as plt
-from slacker import Slacker
 import io
 import requests
 
 
-slack = Slacker("xoxp-463923555735-464821849926-544895594565-795f5333d4821f875dcd5e128a17abd8")
 endpoint_name = os.environ.get('DEEPAR_ENDPOINT_NAME')
 
 def series_to_obj(ts, dynamic_feats=None, cat=None):

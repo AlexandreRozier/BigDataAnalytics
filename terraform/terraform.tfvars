@@ -1,5 +1,5 @@
 secret_key="SsWAucbvQjFkidcMjL17TFjKDiVv6Ma47T+uJ2yy"
 access_key="AKIAJCF47PRJIZBALEUQ"
 account_id="746022503515"
-deepar_endpoint_name="DEMO-deepar-2019-02-07-14-12-24-232"
+deepar_endpoint_name="Weekly-Deepar-2019-03-12-17-33-53-285"
 mp_endpoint_name="mean-predictor"

@@ -1,5 +1,10 @@
--> todo create key with name default-vpc-access, change public_key parameter
+
+-> log to aws cli with correct account & region
+-> activate correct venv
+
 -> run terraform init
+-> import existing datasets bucket
 -> run terraform plan
 -> check output
 -> run terraform apply
+-> add triggers to lambda

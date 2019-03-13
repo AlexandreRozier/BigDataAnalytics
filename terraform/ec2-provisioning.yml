@@ -1,10 +1,12 @@
 ---
 - hosts: all
   gather_facts: no
-  
- 
-  
+   
   tasks:
+ 
+  - name: install python
+    command: sudo yum -y install python37
+  
   - name: Uploads requirements.txt
     template:
       src: ../utils/requirements.txt
@@ -20,16 +22,13 @@
     template:
       src: ../utils/streaming-data-mock.py
       dest: ~/streaming-script.py
-  
-  - name: Kill previous python3 scripts (Dangerous, could kill other python3 scripts)
-    command: killall python3
 
   - name: Run script 
     shell: cd ~; nohup python3 streaming-script.py </dev/null >/dev/null 2>&1 &
     environment: 
-      S3_BUCKET_NAME: 'fog-datasets'
+      S3_BUCKET_NAME: 'sanitized-datasets'
       S3_KEY: 'streaming-data-mock.csv'
-      S3_OUTPUT_BUCKET: 'fog-datasets'
+      S3_OUTPUT_BUCKET: 'sanitized-datasets'
       S3_OUTPUT_DIRECTORY: 'streaming-data-mock'
 
     

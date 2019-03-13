@@ -5,7 +5,6 @@ import pandas as pd
 import datetime
 from datetime import timedelta
 import logging  
-import botocore 
 import json
 import numpy as np
 from dateutil.tz import tzlocal
