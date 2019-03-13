@@ -1,0 +1,43 @@
+INFO:root:Starting data streaming, upload frequency: 15min...
+INFO:root:Starting data streaming, upload frequency: 15min...
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): sanitized-datasets.s3.amazonaws.com:443
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "GET /streaming-data-mock.csv HTTP/1.1" 200 419232
+DEBUG:s3fs.core:Open S3 connection.  Anonymous: False
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): sanitized-datasets.s3.amazonaws.com:443
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "HEAD /streaming-data-mock.csv HTTP/1.1" 200 0
+DEBUG:s3fs.core:Fetch: sanitized-datasets/streaming-data-mock.csv, 0-5505024
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "GET /streaming-data-mock.csv HTTP/1.1" 206 419232
+DEBUG:root:                     SampleCount
+2018-12-20 16:29:00     246321.0
+2018-12-20 16:34:00     243753.0
+2018-12-20 16:37:00     244140.0
+2018-12-20 16:39:00     245654.0
+2018-12-20 16:42:00     244836.0
+INFO:root:Starting data streaming, upload frequency: 15min...
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): sanitized-datasets.s3.amazonaws.com:443
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "GET /streaming-data-mock.csv HTTP/1.1" 200 419232
+DEBUG:s3fs.core:Open S3 connection.  Anonymous: False
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): sanitized-datasets.s3.amazonaws.com:443
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "HEAD /streaming-data-mock.csv HTTP/1.1" 200 0
+DEBUG:s3fs.core:Fetch: sanitized-datasets/streaming-data-mock.csv, 0-5505024
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "GET /streaming-data-mock.csv HTTP/1.1" 206 419232
+DEBUG:root:                     SampleCount
+2018-12-20 16:29:00     246321.0
+2018-12-20 16:34:00     243753.0
+2018-12-20 16:37:00     244140.0
+2018-12-20 16:39:00     245654.0
+2018-12-20 16:42:00     244836.0
+INFO:root:Creating new batch...
+DEBUG:root:                     SampleCount
+2019-01-09 22:07:00      28746.0
+2019-01-09 22:12:00      27801.0
+2019-01-09 22:17:00      26436.0
+INFO:root:Appending 3 datapoints to 2019-3-13-22-6---2019-3-13-22-21.json
+DEBUG:urllib3.util.retry:Converted retries value: False -> Retry(total=False, connect=None, read=None, redirect=0, status=None)
+DEBUG:urllib3.connectionpool:https://sanitized-datasets.s3.amazonaws.com:443 "PUT /streaming-data-mock/2019-3-13-22-6---2019-3-13-22-21.json HTTP/1.1" 200 0

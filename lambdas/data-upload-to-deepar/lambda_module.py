@@ -10,9 +10,11 @@ import numpy as np
 from dateutil.tz import tzlocal
 import io
 import requests
+from matplotlib import pyplot as plt
 
+endpoint_name = os.environ.get('ENDPOINT_NAME')
+data_freq = os.environ['DATA_FREQUENCY']
 
-endpoint_name = os.environ.get('DEEPAR_ENDPOINT_NAME')
 
 def series_to_obj(ts, dynamic_feats=None, cat=None):
     """
@@ -75,8 +77,8 @@ class DeepARPredictor():
             list_of_df.append(pd.DataFrame(data=response_data['predictions'][k]['quantiles'], index=prediction_index))
         return list_of_df
 
-def lambda_handler(event, context):
 
+def lambda_handler(event, context):
 
     # LOGGING to cloudwatch
     logger = logging.getLogger()
@@ -115,38 +117,36 @@ def lambda_handler(event, context):
     df = df.groupby('Timestamp').sum()
     serie = pd.Series(data=df.SampleCount.values, index=[i.replace(tzinfo=None) for i in pd.to_datetime(df.index)])
     serie = serie.sort_index()
-    data_freq = '5min'
     serie = serie.groupby([pd.Grouper(freq=data_freq)]).sum()
  
     logger.debug(serie)
     runtime= boto3.client('runtime.sagemaker')
   
-    n_3h_datapoints = (60*3)//5
+    n_3h_datapoints = (60*24*7)//5
     
     predictor = DeepARPredictor()
     predictor.set_prediction_parameters(data_freq, n_3h_datapoints)
      
     # Create feature series of holidays
     end_of_holiday = datetime.date(2019, 1, 7)
-    holidays_data = [1 if time < pd.Timestamp(end_of_holiday,tz=None) else 0  for time in serie.index]
-    holidays_feature_serie = pd.Series(data=holidays_data, index=serie.index)
+    #holidays_data = [1 if time < pd.Timestamp(end_of_holiday,tz=None) else 0  for time in serie.index]
+    #holidays_feature_serie = pd.Series(data=holidays_data, index=serie.index)
     
+    # Create feature series of weekdays
     weekends_date = [0 if time.weekday() < 5 else 1 for time in serie.index]
     weekends_feature_series = pd.Series(data=weekends_date, index=serie.index)
 
     predictions = predictor.predict([serie], 
         [[
-            list(holidays_feature_serie)+[0 for i in range(n_3h_datapoints)],
+            #list(holidays_feature_serie)+[0 for i in range(n_3h_datapoints)],
             list(weekends_feature_series)+[0 if (serie.index[-1] + timedelta(minutes=k*5)).weekday() < 5 else 1 for k in range(n_3h_datapoints)],
         ]], runtime)
                                        
     logger.info(predictions)
     
-
-    
     payload={
       "title":"Live prediction",
-      "initial_comment":"Detected new data batch. You'll find below the resulting 3h-forecast.",
+      "initial_comment":"Detected new data batch. You'll find below the resulting weekly-forecast.",
       "filename":"buf.png",
       "token":"xoxp-463923555735-464821849926-544895594565-795f5333d4821f875dcd5e128a17abd8",
       "channels":['#aws'],

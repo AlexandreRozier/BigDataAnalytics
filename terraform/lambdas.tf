@@ -13,7 +13,7 @@ locals {
 
 resource "aws_lambda_function" "DataUploadToDeepAR" {
   function_name = "DataUploadToDeepAR"
-  handler       = "lambda.lambda_handler"
+  handler       = "lambda_module.lambda_handler"
   layers = ["${aws_lambda_layer_version.matplotlib_layer.layer_arn}", "${aws_lambda_layer_version.pandas_layer.layer_arn}"]
   filename      = "${local.DataUploadToDeepAR_zip_path}"
   role          = "${aws_iam_role.lambda_sm_s3_role.arn}"
@@ -24,6 +24,7 @@ resource "aws_lambda_function" "DataUploadToDeepAR" {
   environment {
     variables = {
       ENDPOINT_NAME = "${var.deepar_endpoint_name}"
+      DATA_FREQUENCY = "5min"
     }
   }
 }

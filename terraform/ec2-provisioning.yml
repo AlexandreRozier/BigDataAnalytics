@@ -24,7 +24,7 @@
       dest: ~/streaming-script.py
 
   - name: Run script 
-    shell: cd ~; nohup python3 streaming-script.py </dev/null >/dev/null 2>&1 &
+    shell: cd ~; nohup python3.7 streaming-script.py </dev/null >/dev/null 2>&1 &
     environment: 
       S3_BUCKET_NAME: 'sanitized-datasets'
       S3_KEY: 'streaming-data-mock.csv'

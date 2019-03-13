@@ -1,3 +1,4 @@
 **/package/
 **/*.zip
 **/__pycache__/
+**/*.tfstate*
