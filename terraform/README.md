@@ -28,3 +28,4 @@ A more thorough explanation of the pipeline can be found in section 3 of our LaT
 **Warning: since terraform apply spins up the whole infrastructure and trains our various models, it is expected to run during ~ 2 hours. You can speed this up by specifying more efficient `train_instance_type` in the `train_deploy` scripts.**
 - Add triggers to lambdas from the web interface (make `DataUploadToDeepAR` and `DataUploadToMP` subscribe to the SNS Topic `data-upload`). This is mandatory since Terraform does not support lambda subscription to SNS topics yet.
 
+**Note: Endpoints are not managed trhough terraform, so `terraform destroy` won't delete them. You'll have to delete them manually to avoid wasting money on unused endpoints.**
