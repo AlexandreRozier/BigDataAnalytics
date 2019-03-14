@@ -2,3 +2,4 @@
 **/*.zip
 **/__pycache__/
 **/*.tfstate*
+**/python/

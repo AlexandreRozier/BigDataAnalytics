@@ -26,9 +26,9 @@
   - name: Run script 
     shell: cd ~; nohup python3.7 streaming-script.py </dev/null >/dev/null 2>&1 &
     environment: 
-      S3_BUCKET_NAME: 'sanitized-datasets'
-      S3_KEY: 'streaming-data-mock.csv'
-      S3_OUTPUT_BUCKET: 'sanitized-datasets'
-      S3_OUTPUT_DIRECTORY: 'streaming-data-mock'
+      S3_BUCKET_NAME: {{S3_BUCKET_NAME}}
+      S3_KEY: {{S3_KEY}}
+      S3_OUTPUT_BUCKET: {{S3_OUTPUT_BUCKET}}
+      S3_OUTPUT_DIRECTORY: {{S3_OUTPUT_DIRECTORY}}
 
     

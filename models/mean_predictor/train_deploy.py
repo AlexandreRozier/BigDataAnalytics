@@ -15,23 +15,23 @@ and deploys the model on an endpoint
 '''
 
 parser = argparse.ArgumentParser(description='train and deploy the mean predictor model with AWS sagemaker')
-parser.add_argument('--trainpath', nargs=1, default='s3://fog-datasets/rcf/data/train/data.csv',
+parser.add_argument('--trainpath', default='s3://fog-datasets/rcf/data/train/data.csv',
                     help='AWS S3 path of training data')
-parser.add_argument('--role', nargs=1, default='arn:aws:iam::746022503515:role/sage_maker',
+parser.add_argument('--role', default='arn:aws:iam::746022503515:role/sage_maker',
                     help='AWS IAM role for usage with sagemaker')
-parser.add_argument('--outpath', nargs=1, default='s3://mean-predictor/output',
+parser.add_argument('--outpath',  default='s3://mean-predictor/output',
                     help='AWS S3 path for training output logs')
-parser.add_argument('--name', nargs=1, default='mean-predictor', help='Name of docker image in AWS ECR')          
-parser.add_argument('--freq', nargs=1, default='5min',
+parser.add_argument('--name',  default='mean-predictor', help='Name of docker image in AWS ECR')          
+parser.add_argument('--freq',  default='5min',
                     help='frequency to use for predictions')
-parser.add_argument('--update', nargs=1, type=bool, default=False,
+parser.add_argument('--update', type=bool, default=False,
                     help='''
                     Wether to create a new endpoint or update the existing one. 
                     Sagemaker will crash if you try to update a non existent endpoint''')
 
 if __name__ == '__main__':
   args = parser.parse_args()
-
+  print(args.trainpath)
   sess = sage.Session()
 
   account = sess.boto_session.client('sts').get_caller_identity()['Account']

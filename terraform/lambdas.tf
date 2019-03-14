@@ -2,10 +2,13 @@
 
 variable "deepar_endpoint_name" {} 
 variable "mp_endpoint_name" {} 
-
+variable "data_aggregation_frequency" {}
+variable "chatbot_url" {}
+variable "slack_url" {}
 locals {
   DataUploadToDeepAR_zip_path = "${path.module}/../lambdas/data-upload-to-deepar/lambda.zip"
   DataUploadToMP_zip_path = "${path.module}/../lambdas/data-upload-to-mp/lambda.zip"
+  ChatbotAlert_zip_path = "${path.module}/../lambdas/chatbot-alert/lambda.zip"
   matplotlib_layer_zip_path = "${path.module}/../lambdas/layers/matplotlib/layer.zip"
   pandas_layer_zip_path = "${path.module}/../lambdas/layers/pandas/layer.zip"
 }
@@ -24,7 +27,24 @@ resource "aws_lambda_function" "DataUploadToDeepAR" {
   environment {
     variables = {
       ENDPOINT_NAME = "${var.deepar_endpoint_name}"
-      DATA_FREQUENCY = "5min"
+      DATA_FREQUENCY = "${var.data_aggregation_frequency}"
+    }
+  }
+}
+
+
+resource "aws_lambda_function" "ChatbotAlert" {
+  function_name = "alertDemo"
+  handler       = "lambda_module.handler"
+  filename      = "${local.ChatbotAlert_zip_path}"
+  role          = "${aws_iam_role.lambda_sm_s3_role.arn}"
+  runtime       = "nodejs8.10"
+  memory_size   = "128" //mb
+  timeout = "3" //s
+  environment{
+    variables ={
+      CHATBOX_URL = "${var.chatbot_url}"
+      SLACK_URL = "${var.slack_url}"
     }
   }
 }
@@ -64,7 +84,7 @@ resource "aws_lambda_layer_version" "pandas_layer" {
 
 
 resource "aws_iam_role" "lambda_sm_s3_role" {
-  description="Role giving lambda full access to S3 and SageMaker"
+  description="Role giving lambda full access to Lamda, S3 and SageMaker"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -88,6 +108,12 @@ resource "aws_iam_role_policy_attachment" "s3fa-to-lambda" {
   role       = "${aws_iam_role.lambda_sm_s3_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
+
+resource "aws_iam_role_policy_attachment" "lafa-to-lambda" {
+  role       = "${aws_iam_role.lambda_sm_s3_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+}
+
 
 resource "aws_iam_role_policy_attachment" "smfa-to-lambda" {
   role       = "${aws_iam_role.lambda_sm_s3_role.name}"

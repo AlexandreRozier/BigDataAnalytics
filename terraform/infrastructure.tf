@@ -1,21 +1,24 @@
 variable "access_key" {}
 variable "secret_key" {}
+
 variable "account_id" {
   description = "AWS Account id"
 }
+
 variable "region" {
   default = "us-east-1"
 }
 
-  
+variable "bmw-bucket" {
+  description = "Name of the bucket containing the BMW data"
+}
+
 provider "aws" {
-  version = "~> 1.58"
+  version    = "~> 1.58"
   access_key = "${var.access_key}"
   secret_key = "${var.secret_key}"
   region     = "${var.region}"
 }
-
-
 
 /*
 # Uncomment for remote state backend
@@ -28,8 +31,6 @@ provider "aws" {
     encrypt = true
   }
 } */
-
-
 
 resource "aws_security_group" "default" {
   name        = "allow_ssh"
@@ -53,16 +54,26 @@ resource "aws_security_group" "default" {
 }
 
 resource "aws_instance" "stream_data_mock_instance" {
-  instance_type = "t2.micro"
-  security_groups = ["${aws_security_group.default.name}"]
-  ami = "ami-035be7bafff33b6b6"
-  iam_instance_profile= "EC2_S3Access"
-  key_name= "${aws_key_pair.default-vpc-access.key_name}"
-  provisioner "local-exec" {
-    command = "export ANSIBLE_HOST_KEY_CHECKING=False; rm ansible-hosts.ini; echo \"${self.public_ip} ansible_user=ec2-user\" >> ansible-hosts.ini ; sleep 10; ansible-playbook ec2-provisioning.yml --private-key ~/Downloads/default-vpc-access.pem -i ansible-hosts.ini"
-  }
+  instance_type        = "t2.micro"
+  security_groups      = ["${aws_security_group.default.name}"]
+  ami                  = "ami-035be7bafff33b6b6"
+  iam_instance_profile = "EC2_S3Access"
+  key_name             = "${aws_key_pair.default-vpc-access.key_name}"
 
+  depends_on =["aws_s3_bucket.datasets"]
+  provisioner "local-exec" {
+    command = <<EOF
+  export ANSIBLE_HOST_KEY_CHECKING=False; 
+  rm ansible-hosts.ini; 
+  echo \"${self.public_ip} ansible_user=ec2-user\" >> ansible-hosts.ini ; 
+  sleep 10; 
+  ansible-playbook ec2-provisioning.yml 
+  --private-key ~/Downloads/default-vpc-access.pem -i ansible-hosts.ini 
+  --extra-vars \"S3_BUCKET_NAME=${aws_s3_bucket.datasets.bucket} S3_KEY=streaming-data-mock.csv S3_OUTPUT_BUCKET=${aws_s3_bucket.datasets.bucket}  S3_OUTPUT_DIRECTORY=streaming-data-mock \""
+  EOF
+  }
 }
+
 output "public_ip" {
   value = "${aws_instance.stream_data_mock_instance.public_ip}"
 }
@@ -71,48 +82,58 @@ resource "aws_key_pair" "default-vpc-access" {
   key_name   = "default-vpc-access"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBvRU73Kgr7rxTgXNOiDZG4/iYubUy1P4GsSE4fZlcs3TIDm5NltGFXo4MDwXSvBJuds1zWSDrNpnOTtWfifpenCZs/+y4TeBygK/5Pt04xQyboO5ytawSgLm4VCFwj8nibAcO1wkAtjh5+Q+sVcnsIhW7qTJ5OJwdTYJg4JJNJKn4FIfBMnucZkge2687qLioN3tPwgYG9LsPkdZHEM5kd/dO2AkFkzA3knREVmXCnpyq/c1gy9ufecMeR4nPszvHMgRlzfxx9SuDqjXER7KqYQRmmy7c7ThtwZ33BUVfRwnT+4jUns9WcShGYG3uWgItU9XWytX4JCGxtP0pXEUH dafault-vpc-access"
 }
+
 output "default-vpc-access-public_key" {
   value = "${aws_key_pair.default-vpc-access.public_key}"
 }
 
-
-
 resource "aws_s3_bucket" "datasets" {
-  acl = ""
-  force_destroy = true // dangerous, for dev purpose
-  bucket = "sanitized-datasets"
+  acl           = ""
+  force_destroy = true                 // dangerous, for dev purpose
+  bucket        = "sanitized-datasets"
+  
 
   provisioner "local-exec" {
     command = "aws s3 cp ../mock_data/streaming-data-mock.csv s3://${self.bucket}/streaming-data-mock.csv"
   }
 
-
+  // Preprocess data to shape it according to our models needs
   provisioner "local-exec" {
     command = "python ../models/deep_ar/data_preprocessing.py"
+
     environment {
-      BMW_DATA_BUCKET = "fog-bigdata-bmw-data"
+      BMW_DATA_BUCKET       = "${var.bmw-bucket}"
       SANITIZED_DATA_BUCKET = "${self.bucket}"
-      SAGEMAKER_ROLE_ARN = "${aws_iam_role.sm_role.arn}"
-      DATA_FREQUENCY = "5min"
+      SAGEMAKER_ROLE_ARN    = "${aws_iam_role.sm_role.arn}"
+      DATA_FREQUENCY        = "${var.data_aggregation_frequency}"
     }
   }
 
-  /*
+  // Train a MeanPredictor model and export it as endpoint
+  provisioner "local-exec" {
+    command = "python ../models/mean_predictor/train_deploy.py --trainpath s3://${aws_s3_bucket.datasets.bucket}/rcf/data/train/data.csv --role ${aws_iam_role.sm_role.arn} --freq ${var.data_aggregation_frequency}"
+  }
+
+  /*// Train a DeepAR model and export it as endpoint
+  // WARING: takes ~ 2 hours
   provisioner "local-exec" {
     command = "python ../models/deep_ar/train_deploy.py"
+
     environment {
-      BMW_DATA_BUCKET = "fog-bigdata-bmw-data"
+      BMW_DATA_BUCKET       = "fog-bigdata-bmw-data"
       SANITIZED_DATA_BUCKET = "${self.bucket}"
-      SAGEMAKER_ROLE_ARN = "${aws_iam_role.sm_role.arn}"
-      DATA_FREQUENCY = "5min"
+      SAGEMAKER_ROLE_ARN    = "${aws_iam_role.sm_role.arn}"
+      ENDPOINT_NAME         = "${var.deepar_endpoint_name}"
+      DATA_FREQUENCY        = "${var.data_aggregation_frequency}"
     }
   }*/
 }
 
 /* Publish streamed data to an aws sns topic */
 resource "aws_sns_topic" "data-upload" {
-  name = "data-upload"
+  name         = "data-upload"
   display_name = "BMW push"
+
   policy = <<POLICY
 {
   "Version": "2008-10-17",
@@ -183,10 +204,9 @@ resource "aws_s3_bucket_notification" "StreamMockCreate" {
   }
 }
 
-
-
 resource "aws_iam_role" "sm_role" {
-  description="Role giving lambda full access to S3 and SageMaker"
+  description = "Role giving Sagemaker services access to ECS, SM, S3 and EC2 Container"
+  name = "sage_maker"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -204,8 +224,6 @@ resource "aws_iam_role" "sm_role" {
 EOF
 }
 
-
-
 resource "aws_iam_role_policy_attachment" "ecsfa-to-sm" {
   role       = "${aws_iam_role.sm_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
@@ -213,7 +231,7 @@ resource "aws_iam_role_policy_attachment" "ecsfa-to-sm" {
 
 resource "aws_iam_role_policy_attachment" "ec2fa-to-sm" {
   role       = "${aws_iam_role.sm_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "smfa-to-sm" {
@@ -225,8 +243,3 @@ resource "aws_iam_role_policy_attachment" "s3fa-to-sm" {
   role       = "${aws_iam_role.sm_role.name}"
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
-
-
-
-
-

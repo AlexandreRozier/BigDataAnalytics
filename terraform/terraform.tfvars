@@ -1,5 +1,9 @@
 secret_key="SsWAucbvQjFkidcMjL17TFjKDiVv6Ma47T+uJ2yy"
 access_key="AKIAJCF47PRJIZBALEUQ"
 account_id="746022503515"
-deepar_endpoint_name="Weekly-Deepar-2019-03-12-17-33-53-285"
+deepar_endpoint_name="deep-ar"
 mp_endpoint_name="mean-predictor"
+data_aggregation_frequency="5min" // Stick to minutes for compatibility reasons
+chatbot_url="https://rgh2w4wxk8.execute-api.eu-west-1.amazonaws.com/alert_manager_notification_api_stage_name/"
+slack_url="https://hooks.slack.com/services/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"
+bmw-bucket="fog-bigdata-bmw-data"

@@ -122,10 +122,10 @@ def lambda_handler(event, context):
     logger.debug(serie)
     runtime= boto3.client('runtime.sagemaker')
   
-    n_3h_datapoints = (60*24*7)//5
+    n_week_datapoints = (7*24*60)//int(data_freq.replace('min','')) # Divide by data_freq to get nb of points in one week
     
     predictor = DeepARPredictor()
-    predictor.set_prediction_parameters(data_freq, n_3h_datapoints)
+    predictor.set_prediction_parameters(data_freq, n_week_datapoints)
      
     # Create feature series of holidays
     end_of_holiday = datetime.date(2019, 1, 7)
@@ -139,7 +139,7 @@ def lambda_handler(event, context):
     predictions = predictor.predict([serie], 
         [[
             #list(holidays_feature_serie)+[0 for i in range(n_3h_datapoints)],
-            list(weekends_feature_series)+[0 if (serie.index[-1] + timedelta(minutes=k*5)).weekday() < 5 else 1 for k in range(n_3h_datapoints)],
+            list(weekends_feature_series)+[0 if (serie.index[-1] + timedelta(minutes=k*5)).weekday() < 5 else 1 for k in range(n_week_datapoints)],
         ]], runtime)
                                        
     logger.info(predictions)
