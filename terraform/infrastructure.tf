@@ -106,18 +106,15 @@ resource "aws_s3_bucket" "datasets" {
     }
   }
 
-  // Train a MeanPredictor model and export it as endpoint
-  provisioner "local-exec" {
-    command = "python ../models/mean_predictor/train_deploy.py --trainpath s3://${aws_s3_bucket.datasets.bucket}/rcf/data/train/data.csv --role ${aws_iam_role.sm_role.arn} --freq ${var.data_aggregation_frequency}"
-  }
 
-  // Train a DeepAR model and export it as endpoint
+  // Train a Mean Predictor & a DeepAR model and export them as endpoint.
+  // Both models are trained in parallel thanks to the '&', to speed up the provisioning.
   // WARING: takes ~ 2 hours
   provisioner "local-exec" {
     command = <<EOF
-python ../models/mean_predictor/train_deploy.py --trainpath s3://${aws_s3_bucket.datasets.bucket}/rcf/data/train/data.csv --role ${aws_iam_role.sm_role.arn} --freq ${var.data_aggregation_frequency} &;
-python ../models/deep_ar/train_deploy.py &;
-wait;
+python ../models/mean_predictor/train_deploy.py --trainpath s3://${aws_s3_bucket.datasets.bucket}/rcf/data/train/data.csv --role ${aws_iam_role.sm_role.arn} --freq ${var.data_aggregation_frequency} &
+python ../models/deep_ar/train_deploy.py &
+wait
 EOF
 
     environment {
