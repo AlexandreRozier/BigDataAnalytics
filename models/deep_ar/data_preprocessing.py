@@ -49,7 +49,7 @@ series = series.sort_index()
 #series = series[series.index < datetime.datetime(2019,1,26,0,0,0)]
 series = series.groupby([pd.Grouper(freq=data_freq)]).sum()
 
-# Apply a running mean to the last 15 minutes at each value
+# Apply a running mean of the previous 15 minutes to each datapoint -> smoothing to remove anomalies and have a clean training set
 n_backsteps = 5
 conv = np.hstack([np.ones(n_backsteps)/n_backsteps,np.zeros(n_backsteps-1)])
 pad_vals = np.pad(series.values,n_backsteps-1,mode='edge')

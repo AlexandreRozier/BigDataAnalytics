@@ -124,6 +124,20 @@ resource "aws_s3_bucket" "datasets" {
       DATA_FREQUENCY        = "${var.data_aggregation_frequency}"
     }
   }
+
+  // Delete endpoints on destroy
+  provisioner "local-exec" {
+    when = "destroy"
+    command = "aws sagemaker delete-endpoint --endpoint-name ${var.mp_endpoint_name}"
+    on_failure = "continue"
+  }
+
+  provisioner "local-exec" {
+    when = "destroy"
+    command = "aws sagemaker delete-endpoint --endpoint-name ${var.deepar_endpoint_name}"
+    on_failure = "continue"
+  }
+
 }
 
 /* Publish streamed data to an aws sns topic */
