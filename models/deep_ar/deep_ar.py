@@ -8,11 +8,13 @@ def series_to_obj(ts, dyn_feat=None, cat=None):
         obj["cat"] = cat
 
     if dyn_feat is not None:
-        obj["dynamic_feat"] = dyn_feat,
+        obj["dynamic_feat"] = list(dyn_feat),
     return obj
 
 def series_to_jsonline(ts, dyn_feat=None, cat=None):
-    return json.dumps(series_to_obj(ts, dyn_feat))
+    obj = series_to_obj(ts, dyn_feat)
+    obj["dynamic_feat"] = obj["dynamic_feat"][0]
+    return json.dumps(obj)
 
 class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
 

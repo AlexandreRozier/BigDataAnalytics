@@ -65,11 +65,9 @@ resource "aws_instance" "stream_data_mock_instance" {
     command = <<EOF
   export ANSIBLE_HOST_KEY_CHECKING=False; 
   rm ansible-hosts.ini; 
-  echo \"${self.public_ip} ansible_user=ec2-user\" >> ansible-hosts.ini ; 
+  echo "${self.public_ip} ansible_user=ec2-user" >> ansible-hosts.ini ; 
   sleep 10; 
-  ansible-playbook ec2-provisioning.yml 
-  --private-key ~/Downloads/default-vpc-access.pem -i ansible-hosts.ini 
-  --extra-vars \"S3_BUCKET_NAME=${aws_s3_bucket.datasets.bucket} S3_KEY=streaming-data-mock.csv S3_OUTPUT_BUCKET=${aws_s3_bucket.datasets.bucket}  S3_OUTPUT_DIRECTORY=streaming-data-mock \""
+  ansible-playbook ec2-provisioning.yml --private-key ~/Downloads/default-vpc-access.pem -i ansible-hosts.ini --extra-vars "S3_BUCKET_NAME=${aws_s3_bucket.datasets.bucket} S3_KEY=streaming-data-mock.csv S3_OUTPUT_BUCKET=${aws_s3_bucket.datasets.bucket}  S3_OUTPUT_DIRECTORY=streaming-data-mock";
   EOF
   }
 }
@@ -104,7 +102,6 @@ resource "aws_s3_bucket" "datasets" {
     environment {
       BMW_DATA_BUCKET       = "${var.bmw-bucket}"
       SANITIZED_DATA_BUCKET = "${self.bucket}"
-      SAGEMAKER_ROLE_ARN    = "${aws_iam_role.sm_role.arn}"
       DATA_FREQUENCY        = "${var.data_aggregation_frequency}"
     }
   }

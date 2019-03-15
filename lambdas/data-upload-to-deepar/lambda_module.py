@@ -129,8 +129,8 @@ def lambda_handler(event, context):
      
     # Create feature series of holidays
     end_of_holiday = datetime.date(2019, 1, 7)
-    #holidays_data = [1 if time < pd.Timestamp(end_of_holiday,tz=None) else 0  for time in serie.index]
-    #holidays_feature_serie = pd.Series(data=holidays_data, index=serie.index)
+    holidays_data = [1 if time < pd.Timestamp(end_of_holiday,tz=None) else 0  for time in serie.index]
+    holidays_feature_serie = pd.Series(data=holidays_data, index=serie.index)
     
     # Create feature series of weekdays
     weekends_date = [0 if time.weekday() < 5 else 1 for time in serie.index]
@@ -138,7 +138,7 @@ def lambda_handler(event, context):
 
     predictions = predictor.predict([serie], 
         [[
-            #list(holidays_feature_serie)+[0 for i in range(n_3h_datapoints)],
+            list(holidays_feature_serie)+[0 for i in range(n_3h_datapoints)],
             list(weekends_feature_series)+[0 if (serie.index[-1] + timedelta(minutes=k*5)).weekday() < 5 else 1 for k in range(n_week_datapoints)],
         ]], runtime)
                                        
