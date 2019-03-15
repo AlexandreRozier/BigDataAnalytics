@@ -94,12 +94,8 @@ prefix = 'deep_ar'
 s3_data_path = "{}/{}/data".format(data_bucket_name, prefix)
 
 with s3filesystem.open(s3_data_path + "/train/data.json", 'w') as fp:
-    print([list(holidays_feature_serie[train_idx]), list(weekends_feature_series[train_idx])])
-    #fp.write(series_to_jsonline(series[train_idx], [list(holidays_feature_serie[train_idx]), list(weekends_feature_series[train_idx])]))
-    #fp.write(series_to_jsonline(series[train_idx], list(weekends_feature_series[train_idx])))
+    fp.write(series_to_jsonline(series[train_idx], [list(holidays_feature_serie[train_idx]), list(weekends_feature_series[train_idx])]))
 
 with s3filesystem.open(s3_data_path + "/test/data.json", 'w') as fp:
-    print("pouet")
-    #fp.write(series_to_jsonline(series[test_idx], [list(holidays_feature_serie[test_idx]), list(weekends_feature_series[test_idx])]))
-    #fp.write(series_to_jsonline(series[test_idx], list(weekends_feature_series[test_idx])))
+    fp.write(series_to_jsonline(series[test_idx], [list(holidays_feature_serie[test_idx]), list(weekends_feature_series[test_idx])]))
 
