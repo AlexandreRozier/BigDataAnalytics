@@ -114,7 +114,7 @@ resource "aws_s3_bucket" "datasets" {
     command = "python ../models/mean_predictor/train_deploy.py --trainpath s3://${aws_s3_bucket.datasets.bucket}/rcf/data/train/data.csv --role ${aws_iam_role.sm_role.arn} --freq ${var.data_aggregation_frequency}"
   }
 
-  /*// Train a DeepAR model and export it as endpoint
+  // Train a DeepAR model and export it as endpoint
   // WARING: takes ~ 2 hours
   provisioner "local-exec" {
     command = "python ../models/deep_ar/train_deploy.py"
@@ -126,7 +126,7 @@ resource "aws_s3_bucket" "datasets" {
       ENDPOINT_NAME         = "${var.deepar_endpoint_name}"
       DATA_FREQUENCY        = "${var.data_aggregation_frequency}"
     }
-  }*/
+  }
 }
 
 /* Publish streamed data to an aws sns topic */
