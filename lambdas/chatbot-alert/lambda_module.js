@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 exports.handler = function (event, context) {
-  //const message = event.Records[0].Sns.Message
   const message = event.message
 
   notifySlack(message)
@@ -29,14 +28,14 @@ function notifyChatBot(url, message) {
             priority: 'high'
         }
   
-  console.log("Will call our friends at ChatBoT: %j", request);
+  console.log("Calling ChatBoT: %j", request);
   axios.post(url, request, {headers: headers})
   .then(function (response) {
-    console.log('Alles Gut!');
+    console.log('Received response: %j', response);
     console.log(response);
   })
   .catch(function (error) {
-    console.log('Oh no something went wrong!');
+    console.log('Failed to call ChatBot with error: %j', error);
     console.log(error);
   });
 }
