@@ -1,2 +1,4 @@
 /dynamoDBtoCSV/node_modules
 /dynamoDBtoCSV/config.json
+/lambda_functions/medium_kinesis_analytics_destination/node_modules
+/lambda_functions/medium_bmw_csv_to_kinesis/node_modules
