@@ -1,7 +1,0 @@
-# SSH onto ec2 instance
-ssh -i /Users/clemens/Dropbox/TU_Berlin/2018-19_WS/BMW/tu_big_data_clemens.pem ubuntu@52.21.255.105
-
-# watch file change with fswatch and rsync to server
-alias run_rsync='rsync -azP  -e "ssh -i /Users/clemens/Dropbox/TU_Berlin/2018-19_WS/BMW/tu_big_data_clemens.pem" --exclude ".*/" --exclude ".*" --exclude "tmp/" /Users/clemens/Dropbox/TU_Berlin/2018-19_WS/BMW/ec2/* ubuntu@52.21.255.105:~'
-
-run_rsync; fswatch -or . | while read f; do run_rsync; done
