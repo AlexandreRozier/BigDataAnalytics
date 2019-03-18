@@ -118,7 +118,7 @@ wait
 EOF
 
     environment {
-      BMW_DATA_BUCKET       = "fog-bigdata-bmw-data"
+      BMW_DATA_BUCKET       = "${var.bmw-bucket}"
       SANITIZED_DATA_BUCKET = "${self.bucket}"
       SAGEMAKER_ROLE_ARN    = "${aws_iam_role.sm_role.arn}"
       ENDPOINT_NAME         = "${var.deepar_endpoint_name}"
